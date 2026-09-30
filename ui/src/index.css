@@ -1,0 +1,174 @@
+@import "tailwindcss";
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
+@import "@fontsource/manrope/800.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+@layer base {
+  :root {
+    --font-sans: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    /* Graphite Structure */
+    --graphite-deep: #252522;
+    --graphite: #343430;
+    --graphite-soft: #4A4A43;
+
+    /* Warm Stone Foundation */
+    --stone: #8B877C;
+    --stone-light: #B8B2A5;
+    --background: #D9D3C7;       /* Main Page Background */
+    --background-soft: #E6E0D4;  /* Workspace Surface */
+
+    /* Cream Surfaces (No White) */
+    --surface-cream: #F1EBDD;    /* Primary Content Cards & Panels */
+    --surface-warm: #E9E2D5;     /* Secondary Cards, Tables, Forms */
+    --surface-highlight: #E6D9B9;/* Highlighted Items */
+    --surface-selected: #D8C18A; /* Active/Selected Items */
+
+    /* Gold Accents */
+    --gold: #C6A15B;
+    --gold-soft: #D8C18A;
+    --gold-dark: #9E7B3F;
+
+    /* Bronze & Terracotta */
+    --bronze: #8A6545;
+    --terracotta: #9A5B43;
+
+    /* Text Hierarchy */
+    --text-primary: #252522;
+    --text-secondary: #5E5A51;
+    --text-muted: #7E796E;
+
+    /* Borders */
+    --border: #C7C0B4;
+    --border-strong: #AAA194;
+    --border-gold: #C6A15B;
+
+    /* Restrained Status Colors */
+    --success: #58704F;          /* Olive */
+    --success-soft: #DCE5D7;     /* Olive Soft */
+    --warning: #A8782E;          /* Warm Gold / Amber */
+    --warning-soft: #F1E4C9;     /* Gold Soft */
+    --error: #A34B40;            /* Terracotta / Restrained Red */
+    --error-soft: #F0DCD7;       /* Error Soft */
+
+    /* Source Badges */
+    --s1-color: #252522;
+    --s1-bg: #E6E0D4;
+    --s1-border: #C7C0B4;
+
+    --s2-color: #5E513F;
+    --s2-bg: #F1EBDD;
+    --s2-border: #D8C18A;
+
+    --s3-color: #8A6545;
+    --s3-bg: #E9E2D5;
+    --s3-border: #B8B2A5;
+  }
+
+  /* Force Warm Light Graphite + Gold Theme */
+  body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Typography Scale */
+.type-hero-title {
+  font-size: clamp(44px, 5.5vw, 68px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+.type-page-title {
+  font-size: clamp(30px, 3.5vw, 44px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.type-section-title {
+  font-size: clamp(22px, 2.5vw, 30px);
+  font-weight: 650;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.type-card-title {
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+.type-body-lg {
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.type-body-base {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+.type-mono-id {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #5E513F;
+}
+
+.type-metric-val {
+  font-size: clamp(30px, 3.5vw, 42px);
+  font-weight: 700;
+  line-height: 1.05;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #D9D3C7;
+}
+::-webkit-scrollbar-thumb {
+  background: #AAA194;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8B877C;
+}
+

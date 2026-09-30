@@ -1,0 +1,47 @@
+# Large Data Directories (Registry & Processed Files)
+data/
+*.csv
+*.parquet
+
+# FAISS Index (large binary)
+*.bin
+*.index
+
+# Model Checkpoints & Large Weights
+models/
+*.safetensors
+*.pt
+
+# Python Environment & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# UI Build Output (generated, not source)
+ui/dist/
+ui/node_modules/
+
+# IDE & OS Artifacts
+.idea/
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,21 @@
+{
+  "evaluation_dataset": "val_pairs.parquet",
+  "sample_count": 1958,
+  "confidence_threshold": 0.85,
+  "precision": 0.9657320872274143,
+  "recall": 0.9738219895287958,
+  "accuracy": 0.9703779366700716,
+  "f1_score": 0.969760166840459,
+  "confusion_matrix": {
+    "tp": 930,
+    "fp": 33,
+    "fn": 25,
+    "tn": 970
+  },
+  "latency_benchmarks_ms": {
+    "mean": 78.99206479390462,
+    "median": 77.933669090271,
+    "p95": 88.07495832443237
+  },
+  "hardware": "Multi-threaded CPU (16 threads)"
+}
