@@ -1,0 +1,66 @@
+{
+  "threshold": 0.9,
+  "faiss_prefilter": 0.85,
+  "total_unique_pairs_evaluated": 6718,
+  "surviving_edges_accepted": 13,
+  "discarded_edges_rejected": 6705,
+  "acceptance_rate_percent": 0.19,
+  "graph_total_nodes": 5000,
+  "graph_verified_edges": 13,
+  "connected_components_total": 4987,
+  "multi_record_clusters_count": 12,
+  "max_cluster_size": 3,
+  "sample_golden_entities": [
+    {
+      "ent_id": "ENT_000001",
+      "canonical_name": "park house minor oral surgery north",
+      "canonical_number": "11788813",
+      "size": 3,
+      "members": [
+        "11788813",
+        "11789445",
+        "11789392"
+      ]
+    },
+    {
+      "ent_id": "ENT_000002",
+      "canonical_name": "01 ventures nominee i",
+      "canonical_number": "10227426",
+      "size": 2,
+      "members": [
+        "10227426",
+        "10227301"
+      ]
+    },
+    {
+      "ent_id": "ENT_000003",
+      "canonical_name": "10 cabot square ii trustee no 1",
+      "canonical_number": "oe007051",
+      "size": 2,
+      "members": [
+        "oe007051",
+        "oe007063"
+      ]
+    },
+    {
+      "ent_id": "ENT_000004",
+      "canonical_name": "10 cabot square i trustee no 2",
+      "canonical_number": "oe007036",
+      "size": 2,
+      "members": [
+        "oe007036",
+        "oe007039"
+      ]
+    },
+    {
+      "ent_id": "ENT_000005",
+      "canonical_name": "10 crossfield road",
+      "canonical_number": "05656357",
+      "size": 2,
+      "members": [
+        "05656357",
+        "06807200"
+      ]
+    }
+  ]
+}

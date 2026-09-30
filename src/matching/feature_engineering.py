@@ -77,10 +77,6 @@ OUT_METRICS  = os.path.join(PROJECT_ROOT, "reports", "metrics", "phase6_feature_
 
 os.makedirs(os.path.join(PROJECT_ROOT, "reports", "metrics"), exist_ok=True)
 
-print("=" * 70)
-print("PHASE 6: ADVANCED FEATURE ENGINEERING")
-print("Character-Level Similarities + Null Indicators + Ensemble Assembly")
-print("=" * 70)
 
 # ===========================================================================
 # SECTION 1 -- SERIALIZED TEXT PARSER
@@ -261,209 +257,219 @@ def compute_pair_features(text_a: str, text_b: str) -> dict:
     }
 
 
-# ===========================================================================
-# SECTION 4 -- LOAD CANDIDATE PAIRS
-# ===========================================================================
-print("\n[1/5] Loading candidate pair datasets...")
+def run_feature_engineering():
+    print("=" * 70)
+    print("PHASE 6: ADVANCED FEATURE ENGINEERING")
+    print("Character-Level Similarities + Null Indicators + Ensemble Assembly")
+    print("=" * 70)
 
-if os.path.exists(ALL_PAIRS):
-    df_pairs = pl.read_parquet(ALL_PAIRS)
-    print(f"  -> Full training set: {len(df_pairs):,} pairs")
-elif os.path.exists(VAL_PAIRS):
-    df_pairs = pl.read_parquet(VAL_PAIRS)
-    print(f"  -> Validation set only: {len(df_pairs):,} pairs")
-else:
-    raise FileNotFoundError(
-        "No pair datasets found. Run Phase 4 (generate_training_pairs.py) first."
-    )
+    # ===========================================================================
+    # SECTION 4 -- LOAD CANDIDATE PAIRS
+    # ===========================================================================
+    print("\n[1/5] Loading candidate pair datasets...")
 
-# Guard required columns
-missing_cols = {"text_a", "text_b", "label"} - set(df_pairs.columns)
-if missing_cols:
-    raise ValueError(f"Pair dataset missing required columns: {missing_cols}")
+    if os.path.exists(ALL_PAIRS):
+        df_pairs = pl.read_parquet(ALL_PAIRS)
+        print(f"  -> Full training set: {len(df_pairs):,} pairs")
+    elif os.path.exists(VAL_PAIRS):
+        df_pairs = pl.read_parquet(VAL_PAIRS)
+        print(f"  -> Validation set only: {len(df_pairs):,} pairs")
+    else:
+        raise FileNotFoundError(
+            "No pair datasets found. Run Phase 4 (generate_training_pairs.py) first."
+        )
 
-print(f"  -> Positives: {df_pairs.filter(pl.col('label') == 1).shape[0]:,}")
-print(f"  -> Negatives: {df_pairs.filter(pl.col('label') == 0).shape[0]:,}")
+    # Guard required columns
+    missing_cols = {"text_a", "text_b", "label"} - set(df_pairs.columns)
+    if missing_cols:
+        raise ValueError(f"Pair dataset missing required columns: {missing_cols}")
 
-rows_a  = df_pairs["text_a"].to_list()
-rows_b  = df_pairs["text_b"].to_list()
-labels  = df_pairs["label"].to_list()
+    print(f"  -> Positives: {df_pairs.filter(pl.col('label') == 1).shape[0]:,}")
+    print(f"  -> Negatives: {df_pairs.filter(pl.col('label') == 0).shape[0]:,}")
 
-# Carry through any auxiliary columns produced by Phase 4
-CARRY_COLS = ["faiss_similarity", "pair_type", "query_id", "candidate_id"]
-extra_cols = {
-    col: df_pairs[col].to_list()
-    for col in CARRY_COLS
-    if col in df_pairs.columns
-}
+    rows_a  = df_pairs["text_a"].to_list()
+    rows_b  = df_pairs["text_b"].to_list()
+    labels  = df_pairs["label"].to_list()
 
-
-# ===========================================================================
-# SECTION 5 -- CHARACTER-LEVEL FEATURE EXTRACTION
-# ===========================================================================
-print("\n[2/5] Extracting character-level features for all pairs...")
-
-t0 = time.time()
-feature_rows: list[dict] = []
-for ta, tb in tqdm(zip(rows_a, rows_b), total=len(rows_a),
-                   desc="  Feature extraction", unit="pairs"):
-    feature_rows.append(compute_pair_features(ta, tb))
-
-elapsed = time.time() - t0
-print(f"  -> {len(feature_rows):,} pairs processed in {elapsed:.2f}s "
-      f"({len(feature_rows) / elapsed:,.0f} pairs/sec)")
+    # Carry through any auxiliary columns produced by Phase 4
+    CARRY_COLS = ["faiss_similarity", "pair_type", "query_id", "candidate_id"]
+    extra_cols = {
+        col: df_pairs[col].to_list()
+        for col in CARRY_COLS
+        if col in df_pairs.columns
+    }
 
 
-# ===========================================================================
-# SECTION 6 -- CROSS-ENCODER SEMANTIC SCORE (PHASE 5 MODEL)
-# ===========================================================================
-print("\n[3/5] Scoring pairs with fine-tuned Cross-Encoder (Phase 5)...")
+    # ===========================================================================
+    # SECTION 5 -- CHARACTER-LEVEL FEATURE EXTRACTION
+    # ===========================================================================
+    print("\n[2/5] Extracting character-level features for all pairs...")
 
-if HAS_CE and os.path.exists(MODEL_DIR):
-    cross_encoder  = CrossEncoder(MODEL_DIR, device="cpu")
-    pairs_for_ce   = [[a, b] for a, b in zip(rows_a, rows_b)]
-    t0             = time.time()
-    ce_scores      = cross_encoder.predict(pairs_for_ce, batch_size=64,
-                                           show_progress_bar=True)
-    ce_time        = time.time() - t0
-    ce_scores_list = [float(s) for s in ce_scores]
-    print(f"  -> {len(ce_scores_list):,} pairs scored in {ce_time:.2f}s "
-          f"({len(ce_scores_list) / ce_time:,.0f} pairs/sec)")
-else:
-    reason = ("model directory not found at " + MODEL_DIR
-              if not os.path.exists(MODEL_DIR) else
-              "sentence-transformers not installed")
-    print(f"  [SKIP] {reason}")
-    print("         cross_encoder_score set to NaN -- run Phase 5 first.")
-    ce_scores_list = [float("nan")] * len(feature_rows)
+    t0 = time.time()
+    feature_rows: list[dict] = []
+    for ta, tb in tqdm(zip(rows_a, rows_b), total=len(rows_a),
+                       desc="  Feature extraction", unit="pairs"):
+        feature_rows.append(compute_pair_features(ta, tb))
+
+    elapsed = time.time() - t0
+    print(f"  -> {len(feature_rows):,} pairs processed in {elapsed:.2f}s "
+          f"({len(feature_rows) / elapsed:,.0f} pairs/sec)")
 
 
-# ===========================================================================
-# SECTION 7 -- ASSEMBLE ENSEMBLE DATASET
-# ===========================================================================
-print("\n[4/5] Assembling ensemble feature dataset...")
+    # ===========================================================================
+    # SECTION 6 -- CROSS-ENCODER SEMANTIC SCORE (PHASE 5 MODEL)
+    # ===========================================================================
+    print("\n[3/5] Scoring pairs with fine-tuned Cross-Encoder (Phase 5)...")
 
-ensemble_records: list[dict] = []
-for i, feat in enumerate(feature_rows):
-    record: dict = {}
-    record["cross_encoder_score"] = ce_scores_list[i]  # neural semantic score
-    record.update(feat)                                 # deterministic features
-    record["label"] = int(labels[i])                   # ground truth
-    for col, vals in extra_cols.items():
-        record[col] = vals[i]                           # carry-through metadata
-    ensemble_records.append(record)
-
-df_ensemble = pl.DataFrame(ensemble_records)
-
-# Canonical column order
-ORDERED = [
-    "cross_encoder_score",
-    "name_jaro_winkler", "name_levenshtein_norm", "name_exact",
-    "town_jaro_winkler",
-    "postcode_exact", "postcode_jaro",
-    "address_jaro",
-    "is_address_missing_a", "is_address_missing_b",
-    "is_town_missing_a",    "is_town_missing_b",
-    "is_postcode_missing_a","is_postcode_missing_b",
-    "both_address_missing",  "both_postcode_missing",
-    "label",
-] + [c for c in extra_cols if c in df_ensemble.columns]
-ORDERED = [c for c in ORDERED if c in df_ensemble.columns]
-
-df_ensemble = df_ensemble.select(ORDERED)
-df_ensemble.write_parquet(OUT_ENSEMBLE, compression="snappy")
-print(f"  -> Saved: {OUT_ENSEMBLE}")
-print(f"  -> Shape: {df_ensemble.shape[0]:,} rows x {df_ensemble.shape[1]} columns")
+    if HAS_CE and os.path.exists(MODEL_DIR):
+        cross_encoder  = CrossEncoder(MODEL_DIR, device="cpu")
+        pairs_for_ce   = [[a, b] for a, b in zip(rows_a, rows_b)]
+        t0             = time.time()
+        ce_scores      = cross_encoder.predict(pairs_for_ce, batch_size=64,
+                                               show_progress_bar=True)
+        ce_time        = time.time() - t0
+        ce_scores_list = [float(s) for s in ce_scores]
+        print(f"  -> {len(ce_scores_list):,} pairs scored in {ce_time:.2f}s "
+              f"({len(ce_scores_list) / ce_time:,.0f} pairs/sec)")
+    else:
+        reason = ("model directory not found at " + MODEL_DIR
+                  if not os.path.exists(MODEL_DIR) else
+                  "sentence-transformers not installed")
+        print(f"  [SKIP] {reason}")
+        print("         cross_encoder_score set to NaN -- run Phase 5 first.")
+        ce_scores_list = [float("nan")] * len(feature_rows)
 
 
-# ===========================================================================
-# SECTION 8 -- FEATURE STATISTICS & DISCRIMINATIVE AUDIT
-# ===========================================================================
-print("\n[5/5] Computing feature statistics...")
+    # ===========================================================================
+    # SECTION 7 -- ASSEMBLE ENSEMBLE DATASET
+    # ===========================================================================
+    print("\n[4/5] Assembling ensemble feature dataset...")
 
-FEAT_COLS = [c for c in ORDERED
-             if c not in ("label",) + tuple(extra_cols.keys())]
-stats: dict = {"dataset_rows": len(df_ensemble), "features": {}}
+    ensemble_records: list[dict] = []
+    for i, feat in enumerate(feature_rows):
+        record: dict = {}
+        record["cross_encoder_score"] = ce_scores_list[i]  # neural semantic score
+        record.update(feat)                                 # deterministic features
+        record["label"] = int(labels[i])                   # ground truth
+        for col, vals in extra_cols.items():
+            record[col] = vals[i]                           # carry-through metadata
+        ensemble_records.append(record)
 
-df_pos = df_ensemble.filter(pl.col("label") == 1)
-df_neg = df_ensemble.filter(pl.col("label") == 0)
+    df_ensemble = pl.DataFrame(ensemble_records)
 
-print("\n" + "=" * 78)
-print("PHASE 6 FEATURE STATISTICS AUDIT")
-print("=" * 78)
-print(f"  {'Feature':<30} {'Mean':>8} {'Std':>8} {'Min':>7} {'Max':>7}"
-      f"  {'Pos_Mean':>9}  {'Neg_Mean':>9}")
-print("-" * 78)
+    # Canonical column order
+    ORDERED = [
+        "cross_encoder_score",
+        "name_jaro_winkler", "name_levenshtein_norm", "name_exact",
+        "town_jaro_winkler",
+        "postcode_exact", "postcode_jaro",
+        "address_jaro",
+        "is_address_missing_a", "is_address_missing_b",
+        "is_town_missing_a",    "is_town_missing_b",
+        "is_postcode_missing_a","is_postcode_missing_b",
+        "both_address_missing",  "both_postcode_missing",
+        "label",
+    ] + [c for c in extra_cols if c in df_ensemble.columns]
+    ORDERED = [c for c in ORDERED if c in df_ensemble.columns]
 
-for col in FEAT_COLS:
-    try:
-        series  = df_ensemble[col].drop_nulls()
-        m       = float(series.mean())   if len(series) else float("nan")
-        s       = float(series.std())    if len(series) else float("nan")
-        mn      = float(series.min())    if len(series) else float("nan")
-        mx      = float(series.max())    if len(series) else float("nan")
-        pm      = float(df_pos[col].drop_nulls().mean()) if len(df_pos) else float("nan")
-        nm      = float(df_neg[col].drop_nulls().mean()) if len(df_neg) else float("nan")
-        delta   = abs(pm - nm) if pm == pm and nm == nm else float("nan")   # NaN-safe
+    df_ensemble = df_ensemble.select(ORDERED)
+    df_ensemble.write_parquet(OUT_ENSEMBLE, compression="snappy")
+    print(f"  -> Saved: {OUT_ENSEMBLE}")
+    print(f"  -> Shape: {df_ensemble.shape[0]:,} rows x {df_ensemble.shape[1]} columns")
 
-        print(f"  {col:<30} {m:>8.4f} {s:>8.4f} {mn:>7.4f} {mx:>7.4f}"
-              f"  {pm:>9.4f}  {nm:>9.4f}")
 
-        stats["features"][col] = {
-            "mean": round(m, 6), "std": round(s, 6),
-            "min":  round(mn, 6), "max": round(mx, 6),
-            "mean_positive":       round(pm,    6),
-            "mean_negative":       round(nm,    6),
-            "discriminative_delta": round(delta, 6),
-        }
-    except Exception as exc:
-        print(f"  {col:<30} [ERROR: {exc}]")
+    # ===========================================================================
+    # SECTION 8 -- FEATURE STATISTICS & DISCRIMINATIVE AUDIT
+    # ===========================================================================
+    print("\n[5/5] Computing feature statistics...")
 
-print("-" * 78)
+    FEAT_COLS = [c for c in ORDERED
+                 if c not in ("label",) + tuple(extra_cols.keys())]
+    stats: dict = {"dataset_rows": len(df_ensemble), "features": {}}
 
-# -- Sample pair printout ---------------------------------------------------
-def _show_pair(tag: str, idx: int) -> None:
-    row = df_ensemble[idx]
-    print(f"\n{tag}")
-    print(f"  Text A : {rows_a[idx][:90]}")
-    print(f"  Text B : {rows_b[idx][:90]}")
-    print(f"  {'Feature':<30}  Value")
+    df_pos = df_ensemble.filter(pl.col("label") == 1)
+    df_neg = df_ensemble.filter(pl.col("label") == 0)
+
+    print("\n" + "=" * 78)
+    print("PHASE 6 FEATURE STATISTICS AUDIT")
+    print("=" * 78)
+    print(f"  {'Feature':<30} {'Mean':>8} {'Std':>8} {'Min':>7} {'Max':>7}"
+          f"  {'Pos_Mean':>9}  {'Neg_Mean':>9}")
+    print("-" * 78)
+
     for col in FEAT_COLS:
         try:
-            print(f"    {col:<30}  {row[col][0]}")
-        except Exception:
-            pass
+            series  = df_ensemble[col].drop_nulls()
+            m       = float(series.mean())   if len(series) else float("nan")
+            s       = float(series.std())    if len(series) else float("nan")
+            mn      = float(series.min())    if len(series) else float("nan")
+            mx      = float(series.max())    if len(series) else float("nan")
+            pm      = float(df_pos[col].drop_nulls().mean()) if len(df_pos) else float("nan")
+            nm      = float(df_neg[col].drop_nulls().mean()) if len(df_neg) else float("nan")
+            delta   = abs(pm - nm) if pm == pm and nm == nm else float("nan")   # NaN-safe
 
-pos_idx = labels.index(1) if 1 in labels else 0
-neg_idx = labels.index(0) if 0 in labels else 0
-_show_pair("SAMPLE -- POSITIVE PAIR (same entity, injected noise):", pos_idx)
-_show_pair("SAMPLE -- HARD NEGATIVE (high FAISS sim, different entity):", neg_idx)
+            print(f"  {col:<30} {m:>8.4f} {s:>8.4f} {mn:>7.4f} {mx:>7.4f}"
+                  f"  {pm:>9.4f}  {nm:>9.4f}")
 
-# -- Save JSON stats --------------------------------------------------------
-with open(OUT_METRICS, "w", encoding="utf-8") as fh:
-    json.dump(stats, fh, indent=2)
-print(f"\n-> Feature statistics JSON saved: {OUT_METRICS}")
+            stats["features"][col] = {
+                "mean": round(m, 6), "std": round(s, 6),
+                "min":  round(mn, 6), "max": round(mx, 6),
+                "mean_positive":       round(pm,    6),
+                "mean_negative":       round(nm,    6),
+                "discriminative_delta": round(delta, 6),
+            }
+        except Exception as exc:
+            print(f"  {col:<30} [ERROR: {exc}]")
 
-# -- Ranked discriminative features ----------------------------------------
-deltas = [
-    (col, stats["features"][col]["discriminative_delta"])
-    for col in stats["features"]
-    if stats["features"][col]["discriminative_delta"] ==
-       stats["features"][col]["discriminative_delta"]   # NaN-safe
-]
-deltas.sort(key=lambda x: x[1], reverse=True)
-print("\nTOP DISCRIMINATIVE FEATURES  |mean_positive - mean_negative|:")
-for rank, (col, delta) in enumerate(deltas, 1):
-    bar = chr(9608) * min(int(delta * 32), 32)
-    print(f"  #{rank:02d}  {col:<30}  delta={delta:.4f}  {bar}")
+    print("-" * 78)
 
-print("\n" + "=" * 70)
-print("PHASE 6 COMPLETE")
-print(f"  Output    : {OUT_ENSEMBLE}")
-print(f"  Columns   : {ORDERED}")
-print("=" * 70)
-print("\nNEXT STEP (Phase 7 Meta-Classifier):")
-print("  Train XGBoost or LogisticRegression on 'ensemble_features.parquet'")
-print("  Target column: 'label'")
-print("  The model learns to combine neural Cross-Encoder score with")
-print("  deterministic character signals for maximum precision.")
+    # -- Sample pair printout ---------------------------------------------------
+    def _show_pair(tag: str, idx: int) -> None:
+        row = df_ensemble[idx]
+        print(f"\n{tag}")
+        print(f"  Text A : {rows_a[idx][:90]}")
+        print(f"  Text B : {rows_b[idx][:90]}")
+        print(f"  {'Feature':<30}  Value")
+        for col in FEAT_COLS:
+            try:
+                print(f"    {col:<30}  {row[col][0]}")
+            except Exception:
+                pass
+
+    pos_idx = labels.index(1) if 1 in labels else 0
+    neg_idx = labels.index(0) if 0 in labels else 0
+    _show_pair("SAMPLE -- POSITIVE PAIR (same entity, injected noise):", pos_idx)
+    _show_pair("SAMPLE -- HARD NEGATIVE (high FAISS sim, different entity):", neg_idx)
+
+    # -- Save JSON stats --------------------------------------------------------
+    with open(OUT_METRICS, "w", encoding="utf-8") as fh:
+        json.dump(stats, fh, indent=2)
+    print(f"\n-> Feature statistics JSON saved: {OUT_METRICS}")
+
+    # -- Ranked discriminative features ----------------------------------------
+    deltas = [
+        (col, stats["features"][col]["discriminative_delta"])
+        for col in stats["features"]
+        if stats["features"][col]["discriminative_delta"] ==
+           stats["features"][col]["discriminative_delta"]   # NaN-safe
+    ]
+    deltas.sort(key=lambda x: x[1], reverse=True)
+    print("\nTOP DISCRIMINATIVE FEATURES  |mean_positive - mean_negative|:")
+    for rank, (col, delta) in enumerate(deltas, 1):
+        bar = chr(9608) * min(int(delta * 32), 32)
+        print(f"  #{rank:02d}  {col:<30}  delta={delta:.4f}  {bar}")
+
+    print("\n" + "=" * 70)
+    print("PHASE 6 COMPLETE")
+    print(f"  Output    : {OUT_ENSEMBLE}")
+    print(f"  Columns   : {ORDERED}")
+    print("=" * 70)
+    print("\nNEXT STEP (Phase 7 Meta-Classifier):")
+    print("  Train XGBoost or LogisticRegression on 'ensemble_features.parquet'")
+    print("  Target column: 'label'")
+    print("  The model learns to combine neural Cross-Encoder score with")
+    print("  deterministic character signals for maximum precision.")
+
+
+if __name__ == "__main__":
+    run_feature_engineering()
