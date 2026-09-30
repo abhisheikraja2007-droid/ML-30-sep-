@@ -39,6 +39,10 @@ wheels/
 # UI Build Output (generated, not source)
 ui/dist/
 ui/node_modules/
+consumer-ui/dist/
+consumer-ui/node_modules/
+**/node_modules/
+**/dist/
 
 # IDE & OS Artifacts
 .idea/

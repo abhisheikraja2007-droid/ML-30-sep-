@@ -1,0 +1,149 @@
+{
+  "dataset_rows": 9790,
+  "features": {
+    "cross_encoder_score": {
+      "mean": 0.532889,
+      "std": 0.481785,
+      "min": 1.2e-05,
+      "max": 0.999945,
+      "mean_positive": 0.98386,
+      "mean_negative": 0.081918,
+      "discriminative_delta": 0.901942
+    },
+    "name_jaro_winkler": {
+      "mean": 0.753179,
+      "std": 0.262464,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.960096,
+      "mean_negative": 0.546261,
+      "discriminative_delta": 0.413835
+    },
+    "name_levenshtein_norm": {
+      "mean": 0.604234,
+      "std": 0.365796,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.9209,
+      "mean_negative": 0.287567,
+      "discriminative_delta": 0.633333
+    },
+    "name_exact": {
+      "mean": 0.234831,
+      "std": 0.423915,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.469663,
+      "mean_negative": 0.0,
+      "discriminative_delta": 0.469663
+    },
+    "town_jaro_winkler": {
+      "mean": 0.89984,
+      "std": 0.241044,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.998558,
+      "mean_negative": 0.801123,
+      "discriminative_delta": 0.197435
+    },
+    "postcode_exact": {
+      "mean": 0.224311,
+      "std": 0.417149,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.256588,
+      "mean_negative": 0.192033,
+      "discriminative_delta": 0.064556
+    },
+    "postcode_jaro": {
+      "mean": 0.852963,
+      "std": 0.114559,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.833792,
+      "mean_negative": 0.872134,
+      "discriminative_delta": 0.038342
+    },
+    "address_jaro": {
+      "mean": 0.68185,
+      "std": 0.334853,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.72382,
+      "mean_negative": 0.63988,
+      "discriminative_delta": 0.08394
+    },
+    "is_address_missing_a": {
+      "mean": 0.005618,
+      "std": 0.074746,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.006946,
+      "mean_negative": 0.00429,
+      "discriminative_delta": 0.002656
+    },
+    "is_address_missing_b": {
+      "mean": 0.131665,
+      "std": 0.338143,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.259244,
+      "mean_negative": 0.004086,
+      "discriminative_delta": 0.255158
+    },
+    "is_town_missing_a": {
+      "mean": 0.040552,
+      "std": 0.197259,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.042084,
+      "mean_negative": 0.039019,
+      "discriminative_delta": 0.003064
+    },
+    "is_town_missing_b": {
+      "mean": 0.041573,
+      "std": 0.199622,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.042084,
+      "mean_negative": 0.041062,
+      "discriminative_delta": 0.001021
+    },
+    "is_postcode_missing_a": {
+      "mean": 0.014607,
+      "std": 0.119979,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.018795,
+      "mean_negative": 0.010419,
+      "discriminative_delta": 0.008376
+    },
+    "is_postcode_missing_b": {
+      "mean": 0.013075,
+      "std": 0.1136,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.018795,
+      "mean_negative": 0.007354,
+      "discriminative_delta": 0.01144
+    },
+    "both_address_missing": {
+      "mean": 0.005516,
+      "std": 0.074067,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.006946,
+      "mean_negative": 0.004086,
+      "discriminative_delta": 0.00286
+    },
+    "both_postcode_missing": {
+      "mean": 0.012564,
+      "std": 0.111388,
+      "min": 0.0,
+      "max": 1.0,
+      "mean_positive": 0.018795,
+      "mean_negative": 0.006333,
+      "discriminative_delta": 0.012462
+    }
+  }
+}
