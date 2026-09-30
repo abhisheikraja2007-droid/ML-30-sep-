@@ -134,7 +134,7 @@ export function Dashboard() {
       {/* Visual Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CandidateVsMatchesChart />
-        <EvaluationMetricsChart metrics={metrics.evaluation} />
+        <EvaluationMetricsChart metrics={metrics?.evaluation ?? metrics} />
       </div>
 
       {/* Recent Reference Activity Table */}

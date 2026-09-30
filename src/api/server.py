@@ -337,7 +337,8 @@ def evaluate_holdout_test_set(threshold: float = 0.85):
 # ==============================================================================
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(
     title="UK Companies House Entity Resolution API",
@@ -441,6 +442,12 @@ def api_batch_resolve(batch: BatchCompanyQuery):
         )
         results.append(res)
     total_time = (time.time() - t_start) * 1000
+    return JSONResponse(status_code=200, content={
+        "results": results,
+        "total_queries": len(results),
+        "total_latency_ms": round(total_time, 2)
+    })
+
 
 def resolve_entity_with_candidates(
     query_name: str,
@@ -670,9 +677,6 @@ def api_resolve_candidates(query: CompanyQuery):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-
 # Mount built React/Vite UI if available
 UI_DIST_DIR = os.path.join(PROJECT_ROOT, "ui", "dist")
 if os.path.exists(UI_DIST_DIR):
@@ -702,7 +706,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Real-time Entity Resolution Engine & API")
     parser.add_argument("--evaluate", action="store_true", help="Run holdout validation set evaluation and latency benchmarking")
     parser.add_argument("--serve", action="store_true", help="Launch FastAPI Uvicorn server")
-    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host address for FastAPI server")
+    parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address for FastAPI server (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=8000, help="Port for FastAPI server")
     args = parser.parse_args()
 
